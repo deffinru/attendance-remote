@@ -2,6 +2,8 @@
 import csv
 from datetime import date, datetime
 
+# Порог опоздания в минутах
+LATE_MINUTES = 0
 
 def check_in(name: str, filename: str = "attendance.csv") -> None:
     """Зарегистрировать вход сотрудника."""
@@ -39,15 +41,17 @@ def mark_late(
     filename: str = "attendance.csv",
     current: str | None = None,
 ) -> None:
-    """Отметить вход с учётом опоздания.
+    """Отметить вход с учётом опоздания (с допуском LATE_MINUTES)."""
+    from datetime import timedelta
 
-    Если время входа позже deadline — событие 'late', иначе 'in'.
-    """
     now = current or datetime.now().strftime("%H:%M")
-    deadline_t = datetime.strptime(deadline, "%H:%M").time()
+    deadline_t = datetime.strptime(deadline, "%H:%M")
+    
+    # Добавляем допуск LATE_MINUTES к дедлайну
+    deadline_with_tolerance = (deadline_t + timedelta(minutes=LATE_MINUTES)).time()
     now_t = datetime.strptime(now, "%H:%M").time()
 
-    event = "late" if now_t > deadline_t else "in"
+    event = "late" if now_t > deadline_with_tolerance else "in"
 
     with open(filename, "a", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)

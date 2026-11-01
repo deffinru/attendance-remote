@@ -1,12 +1,8 @@
 """Тесты для модуля attendance."""
 import os
 import unittest
-from attendance import mark_late
 
-
-from attendance import check_in, check_out
-from attendance import calculate_duration
-
+from attendance import check_in, check_out, calculate_duration, mark_late
 
 
 class TestCheckIn(unittest.TestCase):
@@ -23,6 +19,7 @@ class TestCheckIn(unittest.TestCase):
         """Проверяем, что check_in создаёт запись."""
         check_in("Иван", self.filename)
         self.assertTrue(os.path.exists(self.filename))
+
 
 class TestCheckOut(unittest.TestCase):
     def setUp(self):
@@ -42,6 +39,7 @@ class TestCheckOut(unittest.TestCase):
             content = f.read()
         self.assertIn("out", content)
 
+
 class TestCalculateDuration(unittest.TestCase):
     def setUp(self):
         self.filename = "test_attendance.csv"
@@ -59,11 +57,6 @@ class TestCalculateDuration(unittest.TestCase):
         duration = calculate_duration("Иван", self.filename)
         self.assertIsInstance(duration, float)
         self.assertGreaterEqual(duration, 0)
-
-
-if __name__ == "__main__":
-    unittest.main()
-    
 
 
 class TestMarkLate(unittest.TestCase):
@@ -90,3 +83,7 @@ class TestMarkLate(unittest.TestCase):
         with open(self.filename, encoding="utf-8") as f:
             content = f.read()
         self.assertIn("late", content)
+
+
+if __name__ == "__main__":
+    unittest.main()

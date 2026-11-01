@@ -3,7 +3,7 @@ import csv
 from datetime import date, datetime
 
 # Порог опоздания в минутах
-LATE_MINUTES = 5
+LATE_MINUTES = 10
 
 def check_in(name: str, filename: str = "attendance.csv") -> None:
     """Зарегистрировать вход сотрудника."""

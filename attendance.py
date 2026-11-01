@@ -33,6 +33,26 @@ def calculate_duration(name: str, filename: str = "attendance.csv") -> float:
         return 0.0
     return (out_time - in_time).total_seconds() / 3600
 
+def mark_late(
+    name: str,
+    deadline: str,
+    filename: str = "attendance.csv",
+    current: str | None = None,
+) -> None:
+    """Отметить вход с учётом опоздания.
+
+    Если время входа позже deadline — событие 'late', иначе 'in'.
+    """
+    now = current or datetime.now().strftime("%H:%M")
+    deadline_t = datetime.strptime(deadline, "%H:%M").time()
+    now_t = datetime.strptime(now, "%H:%M").time()
+
+    event = "late" if now_t > deadline_t else "in"
+
+    with open(filename, "a", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow([name, event, datetime.now().isoformat()])
+
 
 if __name__ == "__main__":
     name = input("Введите имя: ")

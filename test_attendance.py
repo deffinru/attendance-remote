@@ -83,6 +83,15 @@ class TestMarkLate(unittest.TestCase):
         with open(self.filename, encoding="utf-8") as f:
             content = f.read()
         self.assertIn("late", content)
+        
+    def test_mark_late_exact_boundary(self):
+        """Если опоздание ровно на LATE_MINUTES, это еще не late (строго больше)."""
+        # Если LATE_MINUTES = 10, дедлайн 09:00, то в 09:10 - это еще "in"
+        mark_late("Иван", "09:00", self.filename, current="09:10")
+        with open(self.filename, encoding="utf-8") as f:
+            content = f.read()
+        self.assertIn("in", content)  
+        self.assertNotIn("late", content)
 
 
 if __name__ == "__main__":

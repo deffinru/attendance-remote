@@ -1,6 +1,8 @@
 """Тесты для модуля attendance."""
 import os
 import unittest
+from attendance import mark_late
+
 
 from attendance import check_in, check_out
 from attendance import calculate_duration
@@ -61,3 +63,30 @@ class TestCalculateDuration(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+    
+
+
+class TestMarkLate(unittest.TestCase):
+    def setUp(self):
+        self.filename = "test_attendance.csv"
+        if os.path.exists(self.filename):
+            os.remove(self.filename)
+
+    def tearDown(self):
+        if os.path.exists(self.filename):
+            os.remove(self.filename)
+
+    def test_mark_late_before_deadline(self):
+        """До дедлайна — обычный вход (in)."""
+        mark_late("Иван", "09:00", self.filename, current="08:30")
+        with open(self.filename, encoding="utf-8") as f:
+            content = f.read()
+        self.assertIn("in", content)
+        self.assertNotIn("late", content)
+
+    def test_mark_late_after_deadline(self):
+        """После дедлайна — отметка late."""
+        mark_late("Иван", "09:00", self.filename, current="09:45")
+        with open(self.filename, encoding="utf-8") as f:
+            content = f.read()
+        self.assertIn("late", content)

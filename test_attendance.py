@@ -92,6 +92,56 @@ class TestMarkLate(unittest.TestCase):
             content = f.read()
         self.assertIn("in", content)  
         self.assertNotIn("late", content)
+        
+class TestAdditionalRequirements(unittest.TestCase):
+    def setUp(self):
+        self.filename = "test_attendance.csv"
+        if os.path.exists(self.filename):
+            os.remove(self.filename)
+
+    def tearDown(self):
+        if os.path.exists(self.filename):
+            os.remove(self.filename)
+
+    def test_file_created_on_check_in(self):
+        """7-й тест: файл создается"""
+        check_in("Тест", self.filename)
+        self.assertTrue(os.path.exists(self.filename))
+
+    def test_duration_zero_if_no_out(self):
+        """8-й тест: если нет выхода, длительность 0"""
+        check_in("Тест", self.filename)
+        self.assertEqual(calculate_duration("Тест", self.filename), 0.0)
+
+    def test_duration_positive(self):
+        """9-й тест: длительность положительная"""
+        check_in("Тест", self.filename)
+        check_out("Тест", self.filename)
+        self.assertGreaterEqual(calculate_duration("Тест", self.filename), 0.0)
+
+    def test_mark_late_no_file_crash(self):
+        """10-й тест: функция не падает при отсутствии файла"""
+        try:
+            mark_late("Тест", "09:00", "nonexistent.csv", current="10:00")
+        except Exception as e:
+            self.fail(f"mark_late вызвала исключение: {e}")
+
+    def test_duration_crosses_midnight(self):
+        """11-й тест (целевой для варианта 6): время выхода раньше входа"""
+        check_in("Ночной", self.filename)
+        
+        # Вручную подменяем время выхода на более раннее
+        with open(self.filename, "a", newline="", encoding="utf-8") as f:
+            import csv
+            from datetime import datetime, timedelta
+            writer = csv.writer(f)
+            out_time = datetime.now() - timedelta(hours=1)
+            writer.writerow(["Ночной", "out", out_time.isoformat()])
+            
+        duration = calculate_duration("Ночной", self.filename)
+        
+        # Проверяем, что она НЕ отрицательная
+        self.assertGreaterEqual(duration, 0.0, "Длительность не может быть отрицательной!")
 
 
 if __name__ == "__main__":

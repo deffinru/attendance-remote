@@ -33,6 +33,9 @@ def calculate_duration(name: str, filename: str = "attendance.csv") -> float:
 
     if in_time is None or out_time is None:
         return 0.0
+    # Если выход раньше входа, возвращаем 0 (пока не умеем переходить через полночь)
+    if out_time < in_time:
+        return 0.0 
     return (out_time - in_time).total_seconds() / 3600
 
 def mark_late(

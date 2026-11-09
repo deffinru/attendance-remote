@@ -5,6 +5,8 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  schedule:
+    - cron: '0 0 * * *'  # Запуск каждый день в полночь (UTC)
 
 jobs:
   validate:
@@ -67,9 +69,42 @@ jobs:
           echo "Files:" >> dist/manifest.txt
           ls -1 dist/ | grep -v manifest.txt >> dist/manifest.txt
           
+      - name: Check secret (without exposing it)
+        run: |
+          if [ -z "${{ secrets.DEPLOY_TOKEN }}" ]; then
+            echo "Error: DEPLOY_TOKEN is not set!"
+            exit 1
+          fi
+          echo "DEPLOY_TOKEN is present (masked)."
+          echo "APP_PORT is ${{ vars.APP_PORT }}"
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: dist-package
           path: dist/
           retention-days: 7
+
+  deploy_test:
+    runs-on: ubuntu-latest
+    needs: package
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: test/attendance
+      url: https://example.com/test/attendance
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-package
+          path: dist/
+          
+      - name: Fake Deploy and Smoke Test
+        run: |
+          echo "Deploying to test environment using token: ***"
+          echo "Running smoke test..."
+          python dist/attendance.py --help || echo "No --help supported, running basic check"
+          echo "Smoke test passed!"

@@ -1,0 +1,30 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.11.10-slim
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Print Python version and commit
+        run: |
+          python --version
+          echo "Commit SHA: ${{ github.sha }}"
+          
+      - name: Compile all Python files
+        run: |
+          python -m py_compile $(find . -name "*.py")
+          
+      - name: Check UTF-8 encoding
+        run: |
+          python check_utf8.py

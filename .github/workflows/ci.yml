@@ -5,8 +5,7 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-  schedule:
-    - cron: '0 0 * * *'  # Запуск каждый день в полночь (UTC)
+  workflow_dispatch:   # <--- ДОБАВЛЯЕМ ВОТ ЭТУ СТРОКУ
 
 jobs:
   validate:
@@ -88,7 +87,7 @@ jobs:
   deploy_test:
     runs-on: ubuntu-latest
     needs: package
-    if: github.ref == 'refs/heads/main'
+    if: github.event_name == 'workflow_dispatch' 
     environment:
       name: test/attendance
       url: https://example.com/test/attendance

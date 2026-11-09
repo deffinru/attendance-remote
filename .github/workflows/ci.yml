@@ -40,3 +40,36 @@ jobs:
       - name: Run unit tests
         run: |
           python -m unittest discover -s . -p "test_*.py" -v
+
+  package:
+    runs-on: ubuntu-latest
+    needs: [validate, unit_tests]
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Create dist directory
+        run: mkdir dist
+        
+      - name: Copy approved files
+        run: |
+          cp attendance.py dist/
+          cp README.md dist/
+          cp Dockerfile dist/
+          cp attendance.csv.example dist/
+          
+      - name: Generate manifest.txt
+        run: |
+          echo "Commit SHA: ${{ github.sha }}" > dist/manifest.txt
+          echo "Pipeline ID: ${{ github.run_id }}" >> dist/manifest.txt
+          echo "Files:" >> dist/manifest.txt
+          ls -1 dist/ | grep -v manifest.txt >> dist/manifest.txt
+          
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-package
+          path: dist/
+          retention-days: 7

@@ -1,7 +1,7 @@
 import os
 import sys
 
-def main():
+def main(:
     for root, dirs, files in os.walk("."):
         # Пропускаем скрытые папки (например, .git)
         dirs[:] = [d for d in dirs if not d.startswith(".")]

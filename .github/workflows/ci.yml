@@ -102,9 +102,14 @@ jobs:
           name: dist-package
           path: dist/
           
-      - name: Fake Deploy and Smoke Test
+      - name: Run Smoke Test
         run: |
-          echo "Deploying to test environment using token: ***"
-          echo "Running smoke test..."
-          python dist/attendance.py --help || echo "No --help supported, running basic check"
-          echo "Smoke test passed!"
+          echo "Начинаем дымовую проверку..."
+          python smoke_test.py > deployment.txt
+          cat deployment.txt
+          
+      - name: Upload deployment report
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-report
+          path: deployment.txt
